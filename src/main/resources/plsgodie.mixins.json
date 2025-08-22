@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "package": "me.kall.plsgodie.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "overwrites": {
+    "conformVisibility": false
+  },
+  "minVersion": "0.8",
+  "client": [
+  ],
+  "mixins": [
+    "LivingEntityMixin",
+    "ReloadCommandMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
