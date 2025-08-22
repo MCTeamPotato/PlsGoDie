@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public final class PlsGoDie {
     public static final String MOD_ID = "plsgodie";
     public static final Logger LOGGER = LogManager.getLogger(PlsGoDie.class);
+    public static boolean requireReload = false;
 
     private static final JsonConfig CONFIG = JsonConfig.create(MOD_ID, "1.0.0")
             .put("Blacklist", Lists.newArrayList())

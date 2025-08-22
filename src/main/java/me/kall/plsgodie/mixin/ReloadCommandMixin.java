@@ -12,5 +12,6 @@ public abstract class ReloadCommandMixin {
     @Inject(method = "reloadPacks", at = @At("TAIL"))
     private static void reload(CallbackInfo ci) {
         PlsGoDie.BLACKLIST = PlsGoDie.init();
+        PlsGoDie.requireReload = true;
     }
 }

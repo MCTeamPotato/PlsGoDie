@@ -1,8 +1,10 @@
 package me.kall.plsgodie.mixin;
 
 import me.kall.plsgodie.PlsGoDie;
+import me.kall.plsgodie.api.ILivingEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -16,16 +18,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin {
+public abstract class LivingEntityMixin implements ILivingEntity {
     @Shadow public abstract boolean isDeadOrDying();
-    @Shadow public abstract boolean hurt(DamageSource source, float amount);
     @Shadow public abstract float getHealth();
+    @Shadow public abstract void die(DamageSource damageSource);
+
+    @Shadow public abstract void remove(Entity.RemovalReason reason);
 
     @Unique private boolean plsGoDie$isBlacklisted = false;
     @Unique private DamageSource plsGoDie$deathReason = null;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void init(EntityType<? extends LivingEntity> entityType, Level level, CallbackInfo ci) {
+        plsGoDie$checkBlacklisted(entityType);
+    }
+
+    @Override
+    public void plsGoDie$checkBlacklisted(EntityType<?> entityType) {
         ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
         if (id != null && PlsGoDie.BLACKLIST.contains(id)) this.plsGoDie$isBlacklisted = true;
     }
@@ -40,7 +49,8 @@ public abstract class LivingEntityMixin {
     private void onTick(CallbackInfo ci) {
         if (this.plsGoDie$isBlacklisted) return;
         if (this.plsGoDie$deathReason != null && !this.isDeadOrDying()) {
-            this.hurt(this.plsGoDie$deathReason, Float.MAX_VALUE);
+            this.die(this.plsGoDie$deathReason);
+            this.remove(Entity.RemovalReason.KILLED);
             PlsGoDie.LOGGER.warn("Entity revived after death: {} (health: {}). Re-applying fatal damage (cause: {})", this.toString(), this.getHealth(), this.plsGoDie$deathReason.toString());
         } else if (this.isDeadOrDying()) {
             this.plsGoDie$deathReason = null;
