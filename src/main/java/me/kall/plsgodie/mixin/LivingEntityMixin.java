@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
@@ -29,10 +30,10 @@ public abstract class LivingEntityMixin {
         if (id != null && PlsGoDie.BLACKLIST.contains(id)) this.plsGoDie$isBlacklisted = true;
     }
 
-    @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setHealth(F)V", shift = At.Shift.AFTER))
-    private void onHurt(DamageSource damageSource, float damageAmount, CallbackInfo ci) {
+    @Inject(method = "hurt", at = @At("RETURN"))
+    private void onHurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if (this.plsGoDie$isBlacklisted) return;
-        if (this.isDeadOrDying()) this.plsGoDie$deathReason = damageSource;
+        if (this.isDeadOrDying()) this.plsGoDie$deathReason = source;
     }
 
     @Inject(method = "tick", at = @At("TAIL"))
