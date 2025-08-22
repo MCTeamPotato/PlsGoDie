@@ -20,3 +20,6 @@ Once a mob is killed, this mod ensures it truly dies, preventing visual glitches
 2. Each tick, checks if a "dead" mob has been revived artificially.
 3. If the mob is revived, re-applies the fatal damage to ensure proper death.
 4. Blacklisted entities are ignored to prevent unintended side effects.
+
+## Note
+* config reloadable during the game by `/reload`

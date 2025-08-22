@@ -9,24 +9,27 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import javax.annotation.Nullable;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin implements ILivingEntity {
     @Shadow public abstract boolean isDeadOrDying();
     @Shadow public abstract float getHealth();
-    @Shadow public abstract void die(DamageSource damageSource);
-
+    @Shadow @Nullable private DamageSource lastDamageSource;
+    @Shadow public abstract boolean hurt(@NotNull DamageSource source, float amount);
     @Shadow public abstract void remove(Entity.RemovalReason reason);
 
     @Unique private boolean plsGoDie$isBlacklisted = false;
     @Unique private DamageSource plsGoDie$deathReason = null;
+    @Unique private int plsGoDie$tryCount = 0;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void init(EntityType<? extends LivingEntity> entityType, Level level, CallbackInfo ci) {
@@ -36,24 +39,29 @@ public abstract class LivingEntityMixin implements ILivingEntity {
     @Override
     public void plsGoDie$checkBlacklisted(EntityType<?> entityType) {
         ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
-        if (id != null && PlsGoDie.BLACKLIST.contains(id)) this.plsGoDie$isBlacklisted = true;
+        if (id != null && PlsGoDie.blacklist.contains(id)) {
+            this.plsGoDie$isBlacklisted = true;
+        }
     }
 
-    @Inject(method = "hurt", at = @At("RETURN"))
-    private void onHurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if (this.plsGoDie$isBlacklisted) return;
-        if (this.isDeadOrDying()) this.plsGoDie$deathReason = source;
+    @Inject(method = "tickDeath", at = @At("HEAD"))
+    private void onTickDeathStart(CallbackInfo ci) {
+        if (this.plsGoDie$deathReason == null && this.lastDamageSource != null) {
+            this.plsGoDie$deathReason = new DamageSource(this.lastDamageSource.typeHolder(), this.lastDamageSource.getDirectEntity(), this.lastDamageSource.getEntity(), this.lastDamageSource.getSourcePosition());
+        }
     }
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void onTick(CallbackInfo ci) {
         if (this.plsGoDie$isBlacklisted) return;
         if (this.plsGoDie$deathReason != null && !this.isDeadOrDying()) {
-            this.die(this.plsGoDie$deathReason);
-            this.remove(Entity.RemovalReason.KILLED);
+            this.hurt(this.plsGoDie$deathReason, 1000000F);
+            plsGoDie$tryCount++;
             PlsGoDie.LOGGER.warn("Entity revived after death: {} (health: {}). Re-applying fatal damage (cause: {})", this.toString(), this.getHealth(), this.plsGoDie$deathReason.toString());
-        } else if (this.isDeadOrDying()) {
-            this.plsGoDie$deathReason = null;
+            if (plsGoDie$tryCount == 3) {
+                PlsGoDie.LOGGER.error("Entity {} is still alive after we applied fatal damage to it. Force-remove it now.", this.toString());
+                this.remove(Entity.RemovalReason.KILLED);
+            }
         }
     }
 }

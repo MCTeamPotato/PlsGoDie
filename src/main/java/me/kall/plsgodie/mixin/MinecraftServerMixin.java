@@ -18,6 +18,7 @@ public abstract class MinecraftServerMixin {
     @Inject(method = "tickServer", at = @At("TAIL"))
     private void onReload(CallbackInfo ci) {
         if (PlsGoDie.requireReload) {
+            PlsGoDie.requireReload = false;
             for (ServerLevel level : this.getAllLevels()) {
                 for (Entity entity : level.getAllEntities()) {
                     if (entity instanceof ILivingEntity) {
@@ -25,7 +26,6 @@ public abstract class MinecraftServerMixin {
                     }
                 }
             }
-            PlsGoDie.requireReload = false;
         }
     }
 }

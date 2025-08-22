@@ -20,7 +20,7 @@ public final class PlsGoDie {
             .put("Blacklist", Lists.newArrayList())
             .initialize();
 
-    public static Set<ResourceLocation> BLACKLIST = init();
+    public static Set<ResourceLocation> blacklist = init();
 
     public static Set<ResourceLocation> init() {
         return CONFIG.getStream("Blacklist", String.class)
