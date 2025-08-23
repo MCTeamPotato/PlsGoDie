@@ -23,3 +23,4 @@ Once a mob is killed, this mod ensures it truly dies, preventing visual glitches
 
 ## Note
 * config reloadable during the game by `/reload`
+* May cause unexpected entity removal (hmmm not quite possible though). That's why the files are tagged as `beta`. Use at your risk. Report bugs on GitHub.

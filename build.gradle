@@ -157,7 +157,7 @@ tasks.register("publishCurseForge", TaskPublishCurseForge) {
 
     UploadArtifact mainFile = upload(cf_project_id, remapJar)
     mainFile.displayName = "${archives_name}-${version}"
-    mainFile.releaseType = "release"
+    mainFile.releaseType = "beta"
     mainFile.changelog = currentChangeLog
     mainFile.changelogType = "markdown"
     mainFile.addModLoader(isNeo ? "NeoForge" : "Forge")

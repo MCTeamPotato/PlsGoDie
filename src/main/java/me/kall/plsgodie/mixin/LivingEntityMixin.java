@@ -29,7 +29,7 @@ public abstract class LivingEntityMixin implements ILivingEntity {
 
     @Unique private boolean plsGoDie$isBlacklisted = false;
     @Unique private DamageSource plsGoDie$deathReason = null;
-    @Unique private int plsGoDie$tryCount = 0;
+    @Unique private boolean plsGoDie$tried = false;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void init(EntityType<? extends LivingEntity> entityType, Level level, CallbackInfo ci) {
@@ -56,12 +56,22 @@ public abstract class LivingEntityMixin implements ILivingEntity {
         if (this.plsGoDie$isBlacklisted) return;
         if (this.plsGoDie$deathReason != null && !this.isDeadOrDying()) {
             this.hurt(this.plsGoDie$deathReason, 1000000F);
-            plsGoDie$tryCount++;
-            PlsGoDie.LOGGER.warn("Entity revived after death: {} (health: {}). Re-applying fatal damage (cause: {})", this.toString(), this.getHealth(), this.plsGoDie$deathReason.toString());
-            if (plsGoDie$tryCount == 3) {
-                PlsGoDie.LOGGER.error("Entity {} is still alive after we applied fatal damage to it. Force-remove it now.", this.toString());
+
+            String entity = this.toString();
+            String health = String.valueOf(this.getHealth());
+            String deathReason = this.plsGoDie$deathReason.toString();
+
+            PlsGoDie.LOGGER.warn("Entity revived after death: {} (health: {}). Re-applying fatal damage (cause: {})", entity, health, deathReason);
+            PlsGoDie.note(false, entity, health, deathReason);
+
+            if (this.plsGoDie$tried && PlsGoDie.force) {
                 this.remove(Entity.RemovalReason.KILLED);
+
+                PlsGoDie.note(true, entity, health, deathReason);
+                PlsGoDie.LOGGER.error("Entity {} is still alive after we applied fatal damage to it. Force-remove it now.", entity);
             }
+
+            this.plsGoDie$tried = true;
         }
     }
 }

@@ -1,0 +1,4 @@
+{
+  "note.plsgodie.info": "Entity revived after death: %s (health: %s). Re-applying fatal damage (cause: %s)",
+  "note.plsgodie.info.force": "Entity %s is still alive after we applied fatal damage to it. Force-remove it now."
+}
