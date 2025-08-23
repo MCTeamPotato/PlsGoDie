@@ -4,7 +4,6 @@ import me.kall.plsgodie.PlsGoDie;
 import me.kall.plsgodie.api.ILivingEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -25,7 +24,7 @@ public abstract class LivingEntityMixin implements ILivingEntity {
     @Shadow public abstract float getHealth();
     @Shadow @Nullable private DamageSource lastDamageSource;
     @Shadow public abstract boolean hurt(@NotNull DamageSource source, float amount);
-    @Shadow public abstract void remove(Entity.RemovalReason reason);
+    @Shadow public abstract void kill();
 
     @Unique private boolean plsGoDie$isBlacklisted = false;
     @Unique private DamageSource plsGoDie$deathReason = null;
@@ -47,7 +46,7 @@ public abstract class LivingEntityMixin implements ILivingEntity {
     @Inject(method = "tickDeath", at = @At("HEAD"))
     private void onTickDeathStart(CallbackInfo ci) {
         if (this.plsGoDie$deathReason == null && this.lastDamageSource != null) {
-            this.plsGoDie$deathReason = new DamageSource(this.lastDamageSource.typeHolder(), this.lastDamageSource.getDirectEntity(), this.lastDamageSource.getEntity(), this.lastDamageSource.getSourcePosition());
+            this.plsGoDie$deathReason = this.lastDamageSource;
         }
     }
 
@@ -65,7 +64,7 @@ public abstract class LivingEntityMixin implements ILivingEntity {
             PlsGoDie.note(false, entity, health, deathReason);
 
             if (this.plsGoDie$tried && PlsGoDie.force) {
-                this.remove(Entity.RemovalReason.KILLED);
+                this.kill();
 
                 PlsGoDie.note(true, entity, health, deathReason);
                 PlsGoDie.LOGGER.error("Entity {} is still alive after we applied fatal damage to it. Force-remove it now.", entity);
