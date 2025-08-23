@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,7 +37,7 @@ public final class PlsGoDie {
 
     public static void init() {
         blacklist = CONFIG.getStream("Blacklist", String.class)
-                .map(ResourceLocation::parse)
+                .map(ResourceLocation::new)
                 .collect(Collectors.toSet());
         notification = CONFIG.getBoolean("NotifyPlayersOnKilling");
         force = CONFIG.getBoolean("ForceRemoveEntityIfItsStillAliveAfterWeApplyFatalDamageOnIt");
