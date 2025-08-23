@@ -23,7 +23,7 @@ public final class PlsGoDie {
     private static final JsonConfig CONFIG = JsonConfig.create(MOD_ID, "1.0.0")
             .put("Blacklist", Lists.newArrayList())
             .put("NotifyPlayersOnKilling", true)
-            .put("ForceRemoveEntityIfItsStillAliveAfterWeApplyFatalDamageOnIt", true)
+            .put("ForceRemoveEntityIfItsStillAliveAfterWeApplyFatalDamageOnIt", false)
             .initialize();
 
     public static Set<ResourceLocation> blacklist = null;
