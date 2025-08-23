@@ -37,7 +37,7 @@ public abstract class LivingEntityMixin implements ILivingEntity {
 
     @Override
     public void plsGoDie$checkBlacklisted(EntityType<?> entityType) {
-        ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
+        ResourceLocation id = ForgeRegistries.ENTITIES.getKey(entityType);
         if (id != null && PlsGoDie.blacklist.contains(id)) {
             this.plsGoDie$isBlacklisted = true;
         }
